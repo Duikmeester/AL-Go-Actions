@@ -32,7 +32,7 @@ function CreateScope {
         [string] $parentTelemetryScopeJson = '{}'
     )
 
-    $signalName = $signals[$eventId] 
+    $signalName = $signals[$eventId]
     if (-not $signalName) {
         throw "Invalid event id ($eventId) is enountered."
     }
@@ -41,7 +41,7 @@ function CreateScope {
         $telemetryScope = RegisterTelemetryScope $parentTelemetryScopeJson
     }
 
-    $telemetryScope = InitTelemetryScope -name $signalName -eventId $eventId  -parameterValues @()  -includeParameters @()
+    $telemetryScope = InitTelemetryScope -name $signalName -eventId $eventId -parameterValues @() -includeParameters @()
 
     return $telemetryScope
 }

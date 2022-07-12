@@ -15,7 +15,7 @@ $bcContainerHelperPath = $null
 try {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
     $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE
-    import-module (Join-Path -path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
 
     if ($telemetryScopeJson -and $telemetryScopeJson -ne "{}") {
         $telemetryScope = RegisterTelemetryScope $telemetryScopeJson

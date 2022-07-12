@@ -22,13 +22,13 @@ function InvokeWebRequest {
         if ($outfile) {
             $params += @{ "outfile" = $outfile }
         }
-        Invoke-WebRequest  @params -Uri $uri
+        Invoke-WebRequest @params -Uri $uri
     }
     catch {
         if ($retry) {
             Start-Sleep -Seconds 60
             try {
-                Invoke-WebRequest  @params -Uri $uri
+                Invoke-WebRequest @params -Uri $uri
                 return
             }
             catch {}
@@ -38,7 +38,7 @@ function InvokeWebRequest {
         $message = $exception.Message
         try {
             if ($errorRecord.ErrorDetails) {
-                $errorDetails = $errorRecord.ErrorDetails | ConvertFrom-Json 
+                $errorDetails = $errorRecord.ErrorDetails | ConvertFrom-Json
                 $errorDetails.psObject.Properties.name | ForEach-Object {
                     $message += " $($errorDetails."$_")"
                 }
@@ -104,14 +104,14 @@ function Get-dependencies {
             if (!($release)) {
                 throw "Could not find a release that matches the criteria."
             }
-                
+
             $download = DownloadRelease -token $dependency.authTokenSecret -projects $projects -api_url $api_url -repository $repository -path $saveToPath -release $release -mask $mask
             if ($download) {
                 $downloadedList += $download
             }
         }
     }
-    
+
     return $downloadedList;
 }
 
@@ -139,7 +139,7 @@ function CmdDo {
         $p = New-Object System.Diagnostics.Process
         $p.StartInfo = $pinfo
         $p.Start() | Out-Null
-    
+
         $outtask = $p.StandardOutput.ReadToEndAsync()
         $errtask = $p.StandardError.ReadToEndAsync()
         $p.WaitForExit();
@@ -150,7 +150,7 @@ function CmdDo {
         if ("$err" -ne "") {
             $message += "$err"
         }
-        
+
         $message = $message.Trim()
 
         if ($p.ExitCode -eq 0) {
@@ -158,16 +158,16 @@ function CmdDo {
                 Write-Host $message
             }
             if ($returnValue) {
-                $message.Replace("`r","").Split("`n")
+                $message.Replace("`r", "").Split("`n")
             }
         }
         else {
-            $message += "`n`nExitCode: "+$p.ExitCode + "`nCommandline: $command $arguments"
+            $message += "`n`nExitCode: " + $p.ExitCode + "`nCommandline: $command $arguments"
             throw $message
         }
     }
     finally {
-    #    [Console]::OutputEncoding = $oldEncoding
+        #    [Console]::OutputEncoding = $oldEncoding
         $env:NO_COLOR = $oldNoColor
     }
 }
@@ -219,7 +219,7 @@ function SemVerObjToSemVerStr {
 
     try {
         $str = "$($semVerObj.Prefix)$($semVerObj.Major).$($semVerObj.Minor).$($semVerObj.Patch)"
-        for ($i=0; $i -lt 5; $i++) {
+        for ($i = 0; $i -lt 5; $i++) {
             $seg = $semVerObj."Addt$i"
             if ($seg -eq 'zzz') { break }
             if ($i -eq 0) { $str += "-$($seg)" } else { $str += ".$($seg)" }
@@ -255,11 +255,11 @@ function SemVerStrToSemVerObj {
         }
         $idx = $verStr.IndexOf('-')
         if ($idx -gt 0) {
-            $segments = $verStr.SubString($idx+1).Split('.')
+            $segments = $verStr.SubString($idx + 1).Split('.')
             if ($segments.Count -ge 5) {
                 throw "max. 5 segments"
             }
-            0..($segments.Count-1) | ForEach-Object {
+            0..($segments.Count - 1) | ForEach-Object {
                 $result = 0
                 if ([int]::TryParse($segments[$_], [ref] $result)) {
                     $obj."Addt$_" = [int]$result
@@ -295,13 +295,13 @@ function GetReleases {
     if ($releases.Count -gt 1) {
         # Sort by SemVer tag
         try {
-            $sortedReleases = $releases.tag_name | 
-                ForEach-Object { SemVerStrToSemVerObj -semVerStr $_ } | 
-                Sort-Object -Property Major,Minor,Patch,Addt0,Addt1,Addt2,Addt3,Addt4 -Descending | 
-                ForEach-Object { SemVerObjToSemVerStr -semVerObj $_ } | ForEach-Object {
-                    $tag_name = $_
-                    $releases | Where-Object { $_.tag_name -eq $tag_name }
-                }
+            $sortedReleases = $releases.tag_name |
+            ForEach-Object { SemVerStrToSemVerObj -semVerStr $_ } |
+            Sort-Object -Property Major, Minor, Patch, Addt0, Addt1, Addt2, Addt3, Addt4 -Descending |
+            ForEach-Object { SemVerObjToSemVerStr -semVerObj $_ } | ForEach-Object {
+                $tag_name = $_
+                $releases | Where-Object { $_.tag_name -eq $tag_name }
+            }
             $sortedReleases
         }
         catch {
@@ -336,7 +336,7 @@ function GetReleaseNotes {
         [string] $tag_name,
         [string] $previous_tag_name
     )
-    
+
     Write-Host "Generating release note $api_url/repos/$repository/releases/generate-notes"
 
     $postParams = @{
@@ -347,7 +347,7 @@ function GetReleaseNotes {
         $postParams["previous_tag_name"] = $previous_tag_name
     }
 
-    InvokeWebRequest -Headers (GetHeader -token $token) -Method POST -Body ($postParams | ConvertTo-Json) -Uri "$api_url/repos/$repository/releases/generate-notes" 
+    InvokeWebRequest -Headers (GetHeader -token $token) -Method POST -Body ($postParams | ConvertTo-Json) -Uri "$api_url/repos/$repository/releases/generate-notes"
 }
 
 function GetLatestRelease {
@@ -356,7 +356,7 @@ function GetLatestRelease {
         [string] $api_url = $ENV:GITHUB_API_URL,
         [string] $repository = $ENV:GITHUB_REPOSITORY
     )
-    
+
     Write-Host "Getting the latest release from $api_url/repos/$repository/releases/latest"
     try {
         InvokeWebRequest -Headers (GetHeader -token $token) -Uri "$api_url/repos/$repository/releases/latest" | ConvertFrom-Json
@@ -381,25 +381,25 @@ function DownloadRelease {
     Write-Host "Downloading release $($release.Name), projects $projects, type $mask"
     if ([string]::IsNullOrEmpty($token)) {
         $authstatus = (invoke-gh -silent -returnValue auth status --show-token) -join " "
-        $token = $authStatus.SubString($authstatus.IndexOf('Token: ')+7).Trim()
+        $token = $authStatus.SubString($authstatus.IndexOf('Token: ') + 7).Trim()
     }
-    $headers = @{ 
+    $headers = @{
         "Accept"        = "application/octet-stream"
         "Authorization" = "token $token"
     }
     $projects.Split(',') | ForEach-Object {
-        $project = $_.Replace('\','_')
+        $project = $_.Replace('\', '_')
         Write-Host "project '$project'"
-        
+
         $release.assets | Where-Object { $_.name -like "$project*-$mask-*.zip" } | ForEach-Object {
             $uri = "$api_url/repos/$repository/releases/assets/$($_.id)"
             Write-Host $uri
             $filename = Join-Path $path $_.name
-            InvokeWebRequest -Headers $headers -Uri $uri -OutFile $filename 
+            InvokeWebRequest -Headers $headers -Uri $uri -OutFile $filename
             return $filename
         }
     }
-}       
+}
 
 function CheckRateLimit {
     Param(
@@ -410,13 +410,13 @@ function CheckRateLimit {
     $rate = (InvokeWebRequest -Headers $headers -Uri "https://api.github.com/rate_limit").Content | ConvertFrom-Json
     $rate | ConvertTo-Json -Depth 99 | Out-Host
     $rate = $rate.rate
-    $percent = [int]($rate.remaining*100/$rate.limit)
+    $percent = [int]($rate.remaining * 100 / $rate.limit)
     Write-Host "$($rate.remaining) API calls remaining out of $($rate.limit) ($percent%)"
     if ($percent -lt 10) {
         $resetTimeStamp = ([datetime] '1970-01-01Z').AddSeconds($rate.reset)
         $waitTime = $resetTimeStamp.Subtract([datetime]::Now)
         Write-Host "Less than 10% API calls left, waiting for $($waitTime.TotalSeconds) seconds for limits to reset."
-        Start-Sleep -seconds $waitTime.TotalSeconds+1
+        Start-Sleep -Seconds $waitTime.TotalSeconds+1
     }
 }
 
@@ -447,7 +447,7 @@ function GetArtifacts {
         $result = @()
         $allArtifactsFound = $true
         $projects.Split(',') | ForEach-Object {
-            $project = $_.Replace('\','_')
+            $project = $_.Replace('\', '_')
             $projectArtifact = $allArtifacts | Where-Object { $_.name -like "$project-$branch-$mask-$version" } | Select-Object -First 1
             if ($projectArtifact) {
                 $result += @($projectArtifact)
@@ -457,7 +457,7 @@ function GetArtifacts {
                 $result = @()
             }
         }
-    } while (!$allArtifactsFound -and $artifacts.total_count -gt $page*$per_page)
+    } while (!$allArtifactsFound -and $artifacts.total_count -gt $page * $per_page)
     $result
 }
 
@@ -472,13 +472,13 @@ function DownloadArtifact {
     Write-Host $artifact.archive_download_url
     if ([string]::IsNullOrEmpty($token)) {
         $authstatus = (invoke-gh -silent -returnValue auth status --show-token) -join " "
-        $token = $authStatus.SubString($authstatus.IndexOf('Token: ')+7).Trim()
+        $token = $authStatus.SubString($authstatus.IndexOf('Token: ') + 7).Trim()
     }
-    $headers = @{ 
+    $headers = @{
         "Authorization" = "token $token"
         "Accept"        = "application/vnd.github.v3+json"
     }
     $outFile = Join-Path $path "$($artifact.Name).zip"
     InvokeWebRequest -Headers $headers -Uri $artifact.archive_download_url -OutFile $outFile
     $outFile
-}    
+}

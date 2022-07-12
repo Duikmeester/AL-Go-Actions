@@ -12,7 +12,7 @@ Param(
     [Parameter(HelpMessage = "Artifacts to deploy", Mandatory = $true)]
     [string] $artifacts,
     [Parameter(HelpMessage = "Type of deployment (CD or Publish)", Mandatory = $false)]
-    [ValidateSet('CD','Publish')]
+    [ValidateSet('CD', 'Publish')]
     [string] $type = "CD"
 )
 
@@ -27,7 +27,7 @@ try {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
     $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE
 
-    import-module (Join-Path -path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
     $telemetryScope = CreateScope -eventId 'DO0075' -parentTelemetryScopeJson $parentTelemetryScopeJson
 
     $EnvironmentName = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($environmentName))
@@ -99,7 +99,8 @@ try {
     try {
         $authContextParams = $authContext | ConvertFrom-Json | ConvertTo-HashTable
         $bcAuthContext = New-BcAuthContext @authContextParams
-    } catch {
+    }
+    catch {
         throw "Authentication failed. $([environment]::Newline) $($_.exception.message)"
     }
 

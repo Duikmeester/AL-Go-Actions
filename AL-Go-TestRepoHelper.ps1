@@ -49,7 +49,7 @@ function Test-Json {
         }
         else {
             Test-Property -settingsFile $settingsFile -json $json -key 'templateUrl' -maynot
-            'nextMajorSchedule','nextMinorSchedule','currentSchedule','githubRunner','runs-on' | ForEach-Object {
+            'nextMajorSchedule', 'nextMinorSchedule', 'currentSchedule', 'githubRunner', 'runs-on' | ForEach-Object {
                 Test-Property -settingsFile $settingsFile -json $json -key $_ -shouldnot
             }
         }
@@ -63,7 +63,7 @@ function Test-ALGoRepository {
     Param(
         [string] $baseFolder
     )
-    
+
     # Test .json files are formatted correctly
     Get-ChildItem -Path $baseFolder -Filter '*.json' -Recurse | ForEach-Object {
         if ($_.FullName -like '*\.AL-Go\Settings.json') {
@@ -76,19 +76,19 @@ function Test-ALGoRepository {
 }
 
 function Write-Big {
-Param(
-    [string] $str
-)
-$chars = @{
-"0" = @'
-   ___  
-  / _ \ 
+    Param(
+        [string] $str
+    )
+    $chars = @{
+        "0" = @'
+   ___
+  / _ \
  | | | |
  | | | |
  | |_| |
-  \___/ 
+  \___/
 '@.Split("`n")
-"1" = @'
+        "1" = @'
   __
  /_ |
   | |
@@ -96,121 +96,121 @@ $chars = @{
   | |
   |_|
 '@.Split("`n")
-"2" = @'
-  ___  
- |__ \ 
+        "2" = @'
+  ___
+ |__ \
     ) |
-   / / 
-  / /_ 
+   / /
+  / /_
  |____|
 '@.Split("`n")
-"3" = @'
-  ____  
- |___ \ 
+        "3" = @'
+  ____
+ |___ \
    __) |
-  |__ < 
+  |__ <
   ___) |
- |____/ 
+ |____/
 '@.Split("`n")
-"4" = @'
-  _  _   
- | || |  
- | || |_ 
+        "4" = @'
+  _  _
+ | || |
+ | || |_
  |__   _|
-    | |  
-    |_|  
+    | |
+    |_|
 '@.Split("`n")
-"5" = @'
-  _____ 
+        "5" = @'
+  _____
  | ____|
- | |__  
- |___ \ 
+ | |__
+ |___ \
   ___) |
- |____/ 
+ |____/
 '@.Split("`n")
-"6" = @'
-    __  
-   / /  
-  / /_  
- | '_ \ 
+        "6" = @'
+    __
+   / /
+  / /_
+ | '_ \
  | (_) |
-  \___/ 
+  \___/
 '@.Split("`n")
-"7" = @'
-  ______ 
+        "7" = @'
+  ______
  |____  |
-     / / 
-    / /  
-   / /   
-  /_/    
+     / /
+    / /
+   / /
+  /_/
 '@.Split("`n")
-"8" = @'
-   ___  
-  / _ \ 
+        "8" = @'
+   ___
+  / _ \
  | (_) |
-  > _ < 
+  > _ <
  | (_) |
-  \___/ 
+  \___/
 '@.Split("`n")
-"9" = @'
-   ___  
-  / _ \ 
+        "9" = @'
+   ___
+  / _ \
  | (_) |
   \__, |
-    / / 
-   /_/  
+    / /
+   /_/
 '@.Split("`n")
-"." = @'
-    
-    
-    
-    
-  _ 
+        "." = @'
+
+
+
+
+  _
  (_)
 '@.Split("`n")
-"v" = @'
-        
-        
+        "v" = @'
+
+
  __   __
  \ \ / /
-  \ V / 
+  \ V /
    \_(_)
 '@.Split("`n")
-"p" = @'
-  _____                _               
- |  __ \              (_)              
+        "p" = @'
+  _____                _
+ |  __ \              (_)
  | |__) | __ _____   ___  _____      __
  |  ___/ '__/ _ \ \ / / |/ _ \ \ /\ / /
- | |   | | |  __/\ V /| |  __/\ V  V / 
- |_|   |_|  \___| \_/ |_|\___| \_/\_/  
+ | |   | | |  __/\ V /| |  __/\ V  V /
+ |_|   |_|  \___| \_/ |_|\___| \_/\_/
 '@.Split("`n")
-"d" = @'
-  _____             
- |  __ \            
+        "d" = @'
+  _____
+ |  __ \
  | |  | | _____   __
  | |  | |/ _ \ \ / /
- | |__| |  __/\ V / 
+ | |__| |  __/\ V /
  |_____/ \___| \_(_)
 '@.Split("`n")
-"a" = @'
-           _           _____          __              _____ _ _   _    _       _       
-     /\   | |         / ____|        / _|            / ____(_) | | |  | |     | |      
-    /  \  | |  ______| |  __  ___   | |_ ___  _ __  | |  __ _| |_| |__| |_   _| |__    
-   / /\ \ | | |______| | |_ |/ _ \  |  _/ _ \| '__| | | |_ | | __|  __  | | | | '_ \   
-  / ____ \| |____    | |__| | (_) | | || (_) | |    | |__| | | |_| |  | | |_| | |_) |  
- /_/    \_\______|    \_____|\___/  |_| \___/|_|     \_____|_|\__|_|  |_|\__,_|_.__/   
+        "a" = @'
+           _           _____          __              _____ _ _   _    _       _
+     /\   | |         / ____|        / _|            / ____(_) | | |  | |     | |
+    /  \  | |  ______| |  __  ___   | |_ ___  _ __  | |  __ _| |_| |__| |_   _| |__
+   / /\ \ | | |______| | |_ |/ _ \  |  _/ _ \| '__| | | |_ | | __|  __  | | | | '_ \
+  / ____ \| |____    | |__| | (_) | | || (_) | |    | |__| | | |_| |  | | |_| | |_) |
+ /_/    \_\______|    \_____|\___/  |_| \___/|_|     \_____|_|\__|_|  |_|\__,_|_.__/
 '@.Split("`n")
-}
-
-
-0..5 | ForEach-Object {
-    $line = $_
-    $str.ToCharArray() | ForEach-Object {
-        $ch = $chars."$_"
-        if ($ch) {
-            Write-Host -noNewline $ch[$line]
-        }
     }
-    Write-Host
-}
+
+
+    0..5 | ForEach-Object {
+        $line = $_
+        $str.ToCharArray() | ForEach-Object {
+            $ch = $chars."$_"
+            if ($ch) {
+                Write-Host -NoNewline $ch[$line]
+            }
+        }
+        Write-Host
+    }
 }

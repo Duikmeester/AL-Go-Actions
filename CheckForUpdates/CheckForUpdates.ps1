@@ -12,7 +12,7 @@ Param(
     [Parameter(HelpMessage = "Set this input to Y in order to update AL-Go System Files if needed", Mandatory = $false)]
     [bool] $update,
     [Parameter(HelpMessage = "Direct Commit (Y/N)", Mandatory = $false)]
-    [bool] $directCommit    
+    [bool] $directCommit
 )
 
 $ErrorActionPreference = "Stop"
@@ -27,7 +27,7 @@ try {
     $baseFolder = $ENV:GITHUB_WORKSPACE
     $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $baseFolder
 
-    import-module (Join-Path -path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
     $telemetryScope = CreateScope -eventId 'DO0071' -parentTelemetryScopeJson $parentTelemetryScopeJson
 
     if ($update) {
@@ -81,7 +81,7 @@ try {
 
     if ($templateUrl -ne "") {
         try {
-            $templateUrl = $templateUrl -replace "https://www.github.com/","$ENV:GITHUB_API_URL/repos/" -replace "https://github.com/","$ENV:GITHUB_API_URL/repos/"
+            $templateUrl = $templateUrl -replace "https://www.github.com/", "$ENV:GITHUB_API_URL/repos/" -replace "https://github.com/", "$ENV:GITHUB_API_URL/repos/"
             Write-Host "Api url $templateUrl"
             $templateInfo = InvokeWebRequest -Headers $headers -Uri $templateUrl | ConvertFrom-Json
         }
@@ -103,15 +103,15 @@ try {
     $templateUrl = $templateInfo.html_url
     Write-Host "Using template from $templateUrl@$templateBranch"
 
-    $headers = @{             
+    $headers = @{
         "Accept" = "application/vnd.github.baptiste-preview+json"
     }
-    $archiveUrl = $templateInfo.archive_url.Replace('{archive_format}','zipball').replace('{/ref}',"/$templateBranch")
+    $archiveUrl = $templateInfo.archive_url.Replace('{archive_format}', 'zipball').replace('{/ref}', "/$templateBranch")
     $tempName = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
     InvokeWebRequest -Headers $headers -Uri $archiveUrl -OutFile "$tempName.zip"
     Expand-7zipArchive -Path "$tempName.zip" -DestinationPath $tempName
     Remove-Item -Path "$tempName.zip"
-    
+
     $checkfiles = @(
         @{ "dstPath" = ".github\workflows"; "srcPath" = ".github\workflows"; "pattern" = "*"; "type" = "workflow" },
         @{ "dstPath" = ".github"; "srcPath" = ".github"; "pattern" = "*.copy.md"; "type" = "releasenotes" }
@@ -180,7 +180,7 @@ try {
                 }
                 $srcContent = $srcContent.Replace($srcPattern, $replacePattern)
             }
-            
+
             if ($baseName -ne "UpdateGitHubGoSystemFiles") {
                 if ($repoSettings.ContainsKey("runs-on")) {
                     $srcPattern = "runs-on: [ windows-latest ]`r`n"
@@ -188,7 +188,7 @@ try {
                     $srcContent = $srcContent.Replace($srcPattern, $replacePattern)
                 }
             }
-                
+
             $dstFile = Join-Path $dstFolder $fileName
             if (Test-Path -Path $dstFile -PathType Leaf) {
                 # file exists, compare
@@ -242,7 +242,7 @@ try {
                 invoke-git clone $url
 
                 Set-Location -Path *
-            
+
                 if (!$directcommit) {
                     $branch = [System.IO.Path]::GetRandomFileName()
                     invoke-git checkout -b $branch
@@ -270,7 +270,7 @@ try {
                 try {
                     $updateFiles | ForEach-Object {
                         $path = [System.IO.Path]::GetDirectoryName($_.DstFile)
-                        if (-not (Test-Path -path $path -PathType Container)) {
+                        if (-not (Test-Path -Path $path -PathType Container)) {
                             New-Item -Path $path -ItemType Directory | Out-Null
                         }
                         if (([System.IO.Path]::GetFileName($_.DstFile) -eq "RELEASENOTES.copy.md") -and (Test-Path $_.DstFile)) {

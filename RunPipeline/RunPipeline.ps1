@@ -24,9 +24,9 @@ $projectPath = $null
 
 try {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
-    $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE 
+    $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE
 
-    import-module (Join-Path -path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
     $telemetryScope = CreateScope -eventId 'DO0080' -parentTelemetryScopeJson $parentTelemetryScopeJson
 
     # Pull docker image in the background
@@ -38,7 +38,7 @@ try {
     $containerName = GetContainerName($project)
 
     $runAlPipelineParams = @{}
-    if ($project  -eq ".") { $project = "" }
+    if ($project -eq ".") { $project = "" }
     $baseFolder = $ENV:GITHUB_WORKSPACE
     if ($bcContainerHelperConfig.useVolumes -and $bcContainerHelperConfig.hostHelperFolder -eq "HostHelperFolder") {
         $allVolumes = "{$(((docker volume ls --format "'{{.Name}}': '{{.Mountpoint}}'") -join ",").Replace('\','\\').Replace("'",'"'))}" | ConvertFrom-Json | ConvertTo-HashTable
@@ -64,7 +64,7 @@ try {
     $secrets = $secretsJson | ConvertFrom-Json | ConvertTo-HashTable
     $appBuild = $settings.appBuild
     $appRevision = $settings.appRevision
-    'licenseFileUrl','insiderSasToken','CodeSignCertificateUrl','CodeSignCertificatePassword','KeyVaultCertificateUrl','KeyVaultCertificatePassword','KeyVaultClientId','StorageContext','ApplicationInsightsConnectionString' | ForEach-Object {
+    'licenseFileUrl', 'insiderSasToken', 'CodeSignCertificateUrl', 'CodeSignCertificatePassword', 'KeyVaultCertificateUrl', 'KeyVaultCertificatePassword', 'KeyVaultClientId', 'StorageContext', 'ApplicationInsightsConnectionString' | ForEach-Object {
         if ($secrets.ContainsKey($_)) {
             $value = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($secrets."$_"))
         }
@@ -95,11 +95,11 @@ try {
             $projectName = $repo.repoName -replace "[^a-z0-9]", "-"
         }
         try {
-            if (get-command New-AzureStorageContext -ErrorAction SilentlyContinue) {
+            if (Get-Command New-AzureStorageContext -ErrorAction SilentlyContinue) {
                 Write-Host "Using Azure.Storage PowerShell module"
             }
             else {
-                if (!(get-command New-AzStorageContext -ErrorAction SilentlyContinue)) {
+                if (!(Get-Command New-AzStorageContext -ErrorAction SilentlyContinue)) {
                     OutputError -message "When publishing to storage account, the build agent needs to have either the Azure.Storage or the Az.Storage PowerShell module installed."
                     exit
                 }
@@ -117,11 +117,11 @@ try {
                 $storageContext = New-AzureStorageContext -StorageAccountName $storageAccount.StorageAccountName -StorageAccountKey $storageAccount.StorageAccountKey
             }
             Write-Host "Storage Context OK"
-            $storageContainerName =  $storageAccount.ContainerName.ToLowerInvariant().replace('{project}',$projectName).ToLowerInvariant()
+            $storageContainerName = $storageAccount.ContainerName.ToLowerInvariant().replace('{project}', $projectName).ToLowerInvariant()
             $storageBlobName = $storageAccount.BlobName.ToLowerInvariant()
             Write-Host "Storage Container Name is $storageContainerName"
             Write-Host "Storage Blob Name is $storageBlobName"
-            Get-AzureStorageContainer -Context $storageContext -name $storageContainerName | Out-Null
+            Get-AzureStorageContainer -Context $storageContext -Name $storageContainerName | Out-Null
         }
         catch {
             OutputWarning -message "StorageContext secret is malformed. Needs to be formatted as Json, containing StorageAccountName, containerName, blobName and sastoken or storageAccountKey, which points to an existing container in a storage account."
@@ -140,7 +140,7 @@ try {
             $installTestApps += "($_)"
         }
     }
-    
+
     # Analyze app.json version dependencies before launching pipeline
 
     # Analyze InstallApps and InstallTestApps before launching pipeline
@@ -148,22 +148,22 @@ try {
     # Check if insidersastoken is used (and defined)
 
     if (!$repo.doNotSignApps -and $CodeSignCertificateUrl -and $CodeSignCertificatePassword) {
-        $runAlPipelineParams += @{ 
-            "CodeSignCertPfxFile" = $codeSignCertificateUrl
-            "CodeSignCertPfxPassword" = ConvertTo-SecureString -string $codeSignCertificatePassword -AsPlainText -Force
+        $runAlPipelineParams += @{
+            "CodeSignCertPfxFile"     = $codeSignCertificateUrl
+            "CodeSignCertPfxPassword" = ConvertTo-SecureString -String $codeSignCertificatePassword -AsPlainText -Force
         }
     }
     if ($applicationInsightsConnectionString) {
-        $runAlPipelineParams += @{ 
+        $runAlPipelineParams += @{
             "applicationInsightsConnectionString" = $applicationInsightsConnectionString
         }
     }
 
     if ($KeyVaultCertificateUrl -and $KeyVaultCertificatePassword -and $KeyVaultClientId) {
-        $runAlPipelineParams += @{ 
-            "KeyVaultCertPfxFile" = $KeyVaultCertificateUrl
-            "keyVaultCertPfxPassword" = ConvertTo-SecureString -string $keyVaultCertificatePassword -AsPlainText -Force
-            "keyVaultClientId" = $keyVaultClientId
+        $runAlPipelineParams += @{
+            "KeyVaultCertPfxFile"     = $KeyVaultCertificateUrl
+            "keyVaultCertPfxPassword" = ConvertTo-SecureString -String $keyVaultCertificatePassword -AsPlainText -Force
+            "keyVaultClientId"        = $keyVaultClientId
         }
     }
 
@@ -204,7 +204,7 @@ try {
     if ($repo.gitHubRunner -ne "windows-latest") {
         $imageName = $repo.cacheImageName
         if ($imageName) {
-            Flush-ContainerHelperCache -keepdays $repo.cacheKeepDays
+            Flush-ContainerHelperCache -keepDays $repo.cacheKeepDays
         }
     }
     $authContext = $null
@@ -224,7 +224,7 @@ try {
             "appVersion" = $repo.repoVersion
         }
     }
-    
+
     $buildArtifactFolder = Join-Path $projectPath ".buildartifacts"
     New-Item $buildArtifactFolder -ItemType Directory | Out-Null
 
@@ -250,7 +250,7 @@ try {
             }
         }
     }
-    
+
     "doNotBuildTests",
     "doNotRunTests",
     "doNotRunBcptTests",
@@ -268,12 +268,12 @@ try {
 
     Write-Host "Invoke Run-AlPipeline"
     Run-AlPipeline @runAlPipelineParams `
-        -pipelinename $workflowName `
+        -pipelineName $workflowName `
         -containerName $containerName `
         -imageName $imageName `
         -bcAuthContext $authContext `
         -environment $environmentName `
-        -artifact $artifact.replace('{INSIDERSASTOKEN}',$insiderSasToken) `
+        -artifact $artifact.replace('{INSIDERSASTOKEN}', $insiderSasToken) `
         -companyName $repo.companyName `
         -memoryLimit $repo.memoryLimit `
         -baseFolder $projectPath `
@@ -299,27 +299,27 @@ try {
         -additionalCountries $additionalCountries `
         -obsoleteTagMinAllowedMajorMinor $repo.obsoleteTagMinAllowedMajorMinor `
         -buildArtifactFolder $buildArtifactFolder `
-        -CreateRuntimePackages:$CreateRuntimePackages `
+        -createRuntimePackages:$CreateRuntimePackages `
         -appBuild $appBuild -appRevision $appRevision `
         -uninstallRemovedApps `
         -RemoveBcContainer { Param([Hashtable]$parameters) Remove-BcContainerSession -containerName $parameters.ContainerName -killPsSessionProcess; Remove-BcContainer @parameters }
 
     if ($storageContext) {
         Write-Host "Publishing to $storageContainerName in $($storageAccount.StorageAccountName)"
-        "Apps","TestApps" | ForEach-Object {
+        "Apps", "TestApps" | ForEach-Object {
             $type = $_
             $artfolder = Join-Path $buildArtifactFolder $type
             if (Test-Path "$artfolder\*") {
-                $versions = @("$($repo.repoVersion).$appBuild.$appRevision-preview","preview")
+                $versions = @("$($repo.repoVersion).$appBuild.$appRevision-preview", "preview")
                 $tempFile = Join-Path $ENV:TEMP "$([Guid]::newguid().ToString()).zip"
                 try {
                     Write-Host "Compressing"
                     Compress-Archive -Path $artfolder -DestinationPath $tempFile -Force
                     $versions | ForEach-Object {
                         $version = $_
-                        $blob = $storageBlobName.replace('{project}',$projectName).replace('{version}',$version).replace('{type}',$type).ToLowerInvariant()
+                        $blob = $storageBlobName.replace('{project}', $projectName).replace('{version}', $version).replace('{type}', $type).ToLowerInvariant()
                         Write-Host "Publishing $blob"
-                        Set-AzureStorageBlobContent -Context $storageContext -Container $storageContainerName -File $tempFile -blob $blob -Force | Out-Null
+                        Set-AzureStorageBlobContent -Context $storageContext -Container $storageContainerName -File $tempFile -Blob $blob -Force | Out-Null
                     }
                 }
                 finally {

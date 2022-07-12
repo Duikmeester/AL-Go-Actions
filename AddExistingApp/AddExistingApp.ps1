@@ -37,11 +37,11 @@ function expandfile {
         # .zip file
         $destinationPath = Join-Path $env:TEMP "$([Guid]::NewGuid().ToString())"
         Expand-7zipArchive -path $path -destinationPath $destinationPath
-    
+
         $directoryInfo = Get-ChildItem $destinationPath | Measure-Object
         if ($directoryInfo.count -eq 0) {
             throw "The file is empty or malformed."
-        }      
+        }
 
         $appFolders = @()
         if (Test-Path (Join-Path $destinationPath 'app.json')) {
@@ -54,13 +54,13 @@ function expandfile {
         }
         $appFolders | ForEach-Object {
             $newFolder = Join-Path $env:TEMP "$([Guid]::NewGuid().ToString())"
-            write-Host "$_ -> $newFolder"
+            Write-Host "$_ -> $newFolder"
             Move-Item -Path $_ -Destination $newFolder -Force
             Write-Host "done"
             $newFolder
         }
         if (Test-Path $destinationPath) {
-            Get-ChildItem $destinationPath -include @("*.zip", "*.app") -Recurse | ForEach-Object {
+            Get-ChildItem $destinationPath -Include @("*.zip", "*.app") -Recurse | ForEach-Object {
                 expandfile $_.FullName
             }
             Remove-Item -Path $destinationPath -Force -Recurse -ErrorAction SilentlyContinue
@@ -69,7 +69,7 @@ function expandfile {
     elseif ([string]::new([char[]](Get-Content $path -Encoding byte -TotalCount 4)) -eq "NAVX") {
         $destinationPath = Join-Path $env:TEMP "$([Guid]::NewGuid().ToString())"
         Extract-AppFileToFolder -appFilename $path -appFolder $destinationPath -generateAppJson
-        $destinationPath        
+        $destinationPath
     }
     else {
         throw "The provided url cannot be extracted. The url might be wrong or the file is malformed."
@@ -90,8 +90,8 @@ try {
     $repoBaseFolder = (Get-Location).path
     $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $repoBaseFolder
 
-    import-module (Join-Path -path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
-    $telemetryScope = CreateScope -eventId 'DO0070' -parentTelemetryScopeJson $parentTelemetryScopeJson 
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
+    $telemetryScope = CreateScope -eventId 'DO0070' -parentTelemetryScopeJson $parentTelemetryScopeJson
 
     $type = "PTE"
     Write-Host "Reading $RepoSettingsFile"
@@ -125,17 +125,17 @@ try {
         if ($appJson.PSObject.Properties.Name -eq "idRange") {
             $ranges += @($appJson.idRange)
         }
-        
+
         $ttype = ""
         $ranges | Select-Object -First 1 | ForEach-Object {
             if ($_.from -lt 100000 -and $_.to -lt 100000) {
                 $ttype = "PTE"
             }
             else {
-                $ttype = "AppSource App" 
+                $ttype = "AppSource App"
             }
         }
-        
+
         if ($appJson.PSObject.Properties.Name -eq "dependencies") {
             $appJson.dependencies | ForEach-Object {
                 if ($_.PSObject.Properties.Name -eq "AppId") {
@@ -144,7 +144,7 @@ try {
                 else {
                     $id = $_.Id
                 }
-                if ($testRunnerApps.Contains($id)) { 
+                if ($testRunnerApps.Contains($id)) {
                     $ttype = "Test App"
                 }
             }
@@ -190,7 +190,7 @@ try {
             try {
                 $settingsJsonFile = Join-Path $baseFolder $ALGoSettingsFile
                 $SettingsJson = Get-Content $settingsJsonFile -Encoding UTF8 | ConvertFrom-Json
-                if (@($settingsJson.appFolders)+@($settingsJson.testFolders)) {
+                if (@($settingsJson.appFolders) + @($settingsJson.testFolders)) {
                     if ($ttype -eq "Test App") {
                         if ($SettingsJson.testFolders -notcontains $foldername) {
                             $SettingsJson.testFolders += @($folderName)
@@ -220,7 +220,7 @@ try {
                     $workspace | ConvertTo-Json -Depth 99 | Set-Content -Path $workspaceFile -Encoding UTF8
                 }
                 catch {
-                   throw "$workspaceFileName is malformed.$([environment]::Newline) $($_.Exception.Message)"
+                    throw "$workspaceFileName is malformed.$([environment]::Newline) $($_.Exception.Message)"
                 }
             }
         }
